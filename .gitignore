@@ -1,0 +1,9 @@
+venv/
+.venv/
+.env
+db.sqlite3
+__pycache__/
+*.pyc
+data/us_cities.csv
+.claude/
+LOOM_SCRIPT.md
