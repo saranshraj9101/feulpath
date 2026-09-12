@@ -1,0 +1,9 @@
+$kind: http-request
+name: "Short route: Chicago, IL -> Indianapolis, IN"
+description: "Under 500 miles: the starting tank covers it, so no fuel stops and $0 cost."
+url: "{{base_url}}/api/route/?start=Chicago, IL&finish=Indianapolis, IN"
+method: GET
+queryParams:
+  start: Chicago, IL
+  finish: Indianapolis, IN
+order: 2000

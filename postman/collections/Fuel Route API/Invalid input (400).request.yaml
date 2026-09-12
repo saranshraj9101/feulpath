@@ -1,0 +1,8 @@
+$kind: http-request
+description: "No state code, so the start can't be resolved: 400 with a message explaining the accepted formats."
+url: "{{base_url}}/api/route/?start=Springfield&finish=Denver, CO"
+method: GET
+queryParams:
+  start: Springfield
+  finish: Denver, CO
+order: 3000

@@ -1,0 +1,9 @@
+$kind: http-request
+name: "Long route: New York, NY -> Los Angeles, CA"
+description: "About 2,800 miles: several fuel stops. Open map_url from the response to see the map."
+url: "{{base_url}}/api/route/?start=New York, NY&finish=Los Angeles, CA"
+method: GET
+queryParams:
+  start: New York, NY
+  finish: Los Angeles, CA
+order: 1000

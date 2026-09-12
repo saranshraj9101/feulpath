@@ -1,0 +1,4 @@
+$kind: collection
+description: Cost-optimal fuel stops along a US truck route. Set base_url to your server (default http://127.0.0.1:8000).
+variables:
+  base_url: http://127.0.0.1:8000
