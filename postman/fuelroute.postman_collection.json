@@ -1,0 +1,60 @@
+{
+  "info": {
+    "name": "Fuel Route API",
+    "description": "Cost-optimal fuel stops along a US truck route. Set base_url to your server (default http://127.0.0.1:8000).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" }
+  ],
+  "item": [
+    {
+      "name": "Long route: New York, NY -> Los Angeles, CA",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/route/?start=New York, NY&finish=Los Angeles, CA",
+          "host": ["{{base_url}}"],
+          "path": ["api", "route", ""],
+          "query": [
+            { "key": "start", "value": "New York, NY" },
+            { "key": "finish", "value": "Los Angeles, CA" }
+          ]
+        },
+        "description": "About 2,800 miles: several fuel stops. Open map_url from the response to see the map."
+      }
+    },
+    {
+      "name": "Short route: Chicago, IL -> Indianapolis, IN",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/route/?start=Chicago, IL&finish=Indianapolis, IN",
+          "host": ["{{base_url}}"],
+          "path": ["api", "route", ""],
+          "query": [
+            { "key": "start", "value": "Chicago, IL" },
+            { "key": "finish", "value": "Indianapolis, IN" }
+          ]
+        },
+        "description": "Under 500 miles: the starting tank covers it, so no fuel stops and $0 cost."
+      }
+    },
+    {
+      "name": "Invalid input (400)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/route/?start=Springfield&finish=Denver, CO",
+          "host": ["{{base_url}}"],
+          "path": ["api", "route", ""],
+          "query": [
+            { "key": "start", "value": "Springfield" },
+            { "key": "finish", "value": "Denver, CO" }
+          ]
+        },
+        "description": "No state code, so the start can't be resolved: 400 with a message explaining the accepted formats."
+      }
+    }
+  ]
+}
