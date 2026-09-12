@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fuel route{% if result %}: {{ result.start.input }} to {{ result.finish.input }}{% endif %}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <style>
+    html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; }
+    #map { position: absolute; inset: 0; }
+    .panel { position: absolute; top: 10px; right: 10px; z-index: 1000; max-width: 300px;
+             background: #fff; padding: 10px 14px; border-radius: 6px; font-size: 14px;
+             box-shadow: 0 1px 4px rgba(0, 0, 0, .3); line-height: 1.5; }
+    .panel.error { left: 10px; right: auto; border-left: 4px solid #c92a2a; }
+    .stop-icon { background: #d9480f; color: #fff; border: 2px solid #fff; border-radius: 50%;
+                 text-align: center; font: 600 12px/22px system-ui, sans-serif;
+                 box-shadow: 0 0 3px rgba(0, 0, 0, .6); }
+  </style>
+</head>
+<body>
+{% if error %}
+  <div class="panel error"><strong>Could not plan route</strong><br>{{ error }}</div>
+{% else %}
+  <div id="map"></div>
+  <div class="panel">
+    <strong>{{ result.start.input }} &rarr; {{ result.finish.input }}</strong><br>
+    {{ result.distance_miles }} mi &middot; {{ result.duration_hours }} h driving<br>
+    {{ result.fuel_stops|length }} fuel stop{{ result.fuel_stops|length|pluralize }}
+    &middot; {{ result.total_gallons }} gal<br>
+    Total fuel cost: <strong>${{ result.total_fuel_cost }}</strong>
+  </div>
+  {{ result.geojson|json_script:"route-geojson" }}
+  {{ tiles|json_script:"map-tiles" }}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script>
+    const data = JSON.parse(document.getElementById("route-geojson").textContent);
+    const tiles = JSON.parse(document.getElementById("map-tiles").textContent);
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+
+    const map = L.map("map");
+    L.tileLayer(tiles.url, { maxZoom: tiles.maxZoom, attribution: tiles.attribution }).addTo(map);
+
+    const route = data.features.find((f) => f.properties.kind === "route");
+    const line = L.geoJSON(route, { style: { color: "#1c7ed6", weight: 4 } });
+    // Set the view before adding any vector layer: Leaflet's renderer has no bounds until then.
+    map.fitBounds(line.getBounds(), { padding: [20, 20] });
+    line.addTo(map);
+    const coords = route.geometry.coordinates;
+    [["Start", coords[0], "#2b8a3e"], ["Finish", coords[coords.length - 1], "#c92a2a"]].forEach(([label, [lng, lat], color]) => {
+      L.circleMarker([lat, lng], { radius: 7, color: "#fff", weight: 2, fillColor: color, fillOpacity: 1 })
+        .addTo(map).bindPopup(label);
+    });
+
+    data.features.filter((f) => f.properties.kind === "fuel_stop").forEach((f) => {
+      const p = f.properties;
+      const icon = L.divIcon({ className: "stop-icon", html: String(p.stop_number), iconSize: [26, 26] });
+      L.marker([p.lat, p.lng], { icon }).addTo(map).bindPopup(
+        `<strong>${p.stop_number}. ${esc(p.name)}</strong><br>` +
+        `${esc(p.address)}, ${esc(p.city)}, ${esc(p.state)}<br>` +
+        `Mile ${p.mile_marker.toFixed(1)}<br>` +
+        `$${p.price_per_gallon.toFixed(3)}/gal &middot; ${p.gallons.toFixed(2)} gal<br>` +
+        `<strong>Cost: $${p.cost.toFixed(2)}</strong>`
+      );
+    });
+  </script>
+{% endif %}
+</body>
+</html>
